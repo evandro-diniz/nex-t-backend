@@ -29,7 +29,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // API stateless com JWT, sem cookies de sessão
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/oauth2/**", "/login/**").permitAll()
                         .anyRequest().authenticated()
