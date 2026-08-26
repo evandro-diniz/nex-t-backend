@@ -28,12 +28,39 @@ public class TarefaService {
     private final PrioridadeService prioridadeService;
 
     public List<TarefaResponse> listarDoDia(Usuario usuario, LocalDate dia) {
+        if (dia.equals(LocalDate.now())){
+            rolarAtrasadasDoUsiario(usuario);
+        }
         List<Tarefa> tarefas = tarefaRepository.findByUsuarioAndDataReferencia(usuario, dia);
         return prioridadeService.ordenarPorPrioridade(tarefas).stream()
                 .map(t -> TarefaResponse.de(t, prioridadeService.calcularScore(t)))
                 .toList();
     }
 
+     private void rolarAtrasadasDoUsuario(Usuario usuario) {
+        LocalDate hoje = LocalDate.now();
+        List<Tarefa> atrasadas = tarefaRepository
+                .findByUsuarioAndStatusNotAndDataReferenciaBefore(usuario, StatusTarefa.FEITO, hoje);
+ 
+        atrasadas.forEach(t -> {
+            t.setDataReferencia(hoje);
+            t.setParaAmanha(false);
+            registrarEvento(t, TipoEvento.ROLADA);
+        });
+ 
+        tarefaRepository.saveAll(atrasadas);
+    }
+
+    public List<TarefaResponse> listarHistorico(Usuario usuario, LocalDate de, LocalDate ate) {
+        List<Tarefa> tarefas = (de != null && ate != null)
+                ? tarefaRepository.findByUsuarioAndDataReferenciaBetweenOrderByDataReferenciaAscCriadaEmAsc(usuario, de, ate)
+                : tarefaRepository.findByUsuarioOrderByDataReferenciaAscCriadaEmAsc(usuario);
+ 
+        return tarefas.stream()
+                .map(t -> TarefaResponse.de(t, prioridadeService.calcularScore(t)))
+                .toList();
+    }
+    
     public TarefaResponse criar(Usuario usuario, TarefaRequest req) {
         Tarefa tarefa = Tarefa.builder()
                 .usuario(usuario)

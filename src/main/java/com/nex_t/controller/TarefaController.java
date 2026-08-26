@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -65,5 +66,14 @@ public class TarefaController {
     @PostMapping("/{id}/reiniciar")
     public TarefaResponse reiniciar(@PathVariable UUID id) {
         return tarefaService.reiniciar(id);
+    }
+
+    @GetMapping("/historico")
+    public List<TarefaResponse> historico(
+            @AuthenticationUsuario Usuario usuario,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate de,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ate
+    ) {
+        return tarefaService.listarHistorico(usuario, de, ate);
     }
 }

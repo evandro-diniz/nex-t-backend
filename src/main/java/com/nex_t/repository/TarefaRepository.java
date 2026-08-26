@@ -17,4 +17,13 @@ public interface TarefaRepository extends JpaRepository<Tarefa, UUID> {
 
     // usado pelo job de rollover: tarefas de dias anteriores que não chegaram a FEITO
     List<Tarefa> findByStatusNotAndDataReferenciaBefore(StatusTarefa status, LocalDate data);
+
+    // adicionado posteriormente
+
+    List<Tarefa> findByUsuarioAndStatusNotAndDataReferenciaBefore(Usuario usuario, StatusTarefa status, LocalDate data);
+
+    List<Tarefa> findByUsuarioOrderByDataReferenciaAscCriadaEmAsc(Usuario usuario);
+
+    List<Tarefa> findByUsuarioAndDataReferenciaBetweenOrderByDataReferenciaAscCriadaEmAsc(
+            Usuario usuario, LocalDate de, LocalDate ate);
 }
