@@ -37,7 +37,7 @@ public class TarefaService {
                 .toList();
     }
 
-     private void rolarAtrasadasDoUsuario(Usuario usuario) {
+    private void rolarAtrasadasDoUsuario(Usuario usuario) {
         LocalDate hoje = LocalDate.now();
         List<Tarefa> atrasadas = tarefaRepository
                 .findByUsuarioAndStatusNotAndDataReferenciaBefore(usuario, StatusTarefa.FEITO, hoje);
@@ -124,6 +124,16 @@ public class TarefaService {
         return TarefaResponse.de(tarefa, prioridadeService.calcularScore(tarefa));
     }
 
+    public TarefaResponse ativarHoje(UUID tarefaId) {
+        Tarefa tarefa = buscar(tarefaId);
+        tarefa.setStatus(StatusTarefa.A_FAZER);
+        tarefa.setDataReferencia(LocalDate.now());
+        tarefa.setParaAmanha(false);
+        tarefaRepository.save(tarefa);
+        registrarEvento(tarefa, TipoEvento.REINICIADA); // reaproveitamos o mesmo tipo de evento
+        return TarefaResponse.de(tarefa, prioridadeService.calcularScore(tarefa));
+    }
+
     /** Cria uma cópia da tarefa concluída de volta em A_FAZER (repetir tarefa). */
     public TarefaResponse reiniciar(UUID tarefaId) {
         Tarefa original = buscar(tarefaId);
@@ -140,6 +150,18 @@ public class TarefaService {
         tarefaRepository.save(copia);
         registrarEvento(copia, TipoEvento.REINICIADA);
         return TarefaResponse.de(copia, prioridadeService.calcularScore(copia));
+    }
+
+    public TarefaResponse editar(UUID tarefaId, TarefaRequest req) {
+        Tarefa tarefa = buscar(tarefaId);
+        tarefa.setTitulo(req.getTitulo());
+        tarefa.setCategoria(req.getCategoria());
+        tarefa.setPrazo(req.getPrazo());
+        tarefa.setUrgente(req.isUrgente());
+        tarefa.setImpacto(req.getImpacto());
+        tarefa.setNota(req.getNota());
+        tarefaRepository.save(tarefa);
+        return TarefaResponse.de(tarefa, prioridadeService.calcularScore(tarefa));
     }
 
     private Tarefa buscar(UUID id) {

@@ -68,6 +68,11 @@ public class TarefaController {
         return tarefaService.reiniciar(id);
     }
 
+    @PostMapping("/{id}/ativar-hoje")
+    public TarefaResponse ativarHoje(@PathVariable UUID id) {
+        return tarefaService.ativarHoje(id);
+    }
+
     @GetMapping("/historico")
     public List<TarefaResponse> historico(
             @AuthenticationUsuario Usuario usuario,
@@ -75,5 +80,10 @@ public class TarefaController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ate
     ) {
         return tarefaService.listarHistorico(usuario, de, ate);
+    }
+
+    @PutMapping("/{id}")
+    public TarefaResponse editar(@PathVariable UUID id, @Valid @RequestBody TarefaRequest request) {
+        return tarefaService.editar(id, request);
     }
 }
