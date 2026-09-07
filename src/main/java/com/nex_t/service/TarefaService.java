@@ -29,7 +29,7 @@ public class TarefaService {
 
     public List<TarefaResponse> listarDoDia(Usuario usuario, LocalDate dia) {
         if (dia.equals(LocalDate.now())){
-            rolarAtrasadasDoUsiario(usuario);
+            rolarAtrasadasDoUsuario(usuario);
         }
         List<Tarefa> tarefas = tarefaRepository.findByUsuarioAndDataReferencia(usuario, dia);
         return prioridadeService.ordenarPorPrioridade(tarefas).stream()
